@@ -312,7 +312,7 @@ export const initState: BoardPiece[] = [
   { col: 0, row: 1, type: "black-knight", name: "black-knight-1", black: true },
   { col: 0, row: 2, type: "black-bishop", name: "black-bishop-1", black: true },
   { col: 0, row: 3, type: "black-queen", name: "black-queen", black: true },
-  { col: 4, row: 4, type: "black-king", name: "black-king", black: true },
+  { col: 0, row: 4, type: "black-king", name: "black-king", black: true },
   { col: 0, row: 5, type: "black-bishop", name: "black-bishop-2", black: true },
   { col: 0, row: 6, type: "black-knight", name: "black-knight-2", black: true },
   { col: 0, row: 7, type: "black-rook", name: "black-rook-2", black: true },
@@ -365,7 +365,6 @@ export const initState: BoardPiece[] = [
   },
   { col: 7, row: 7, type: "white-rook", name: "white-rook-2", black: false },
 ];
-
 
 // export const initState: BoardPiece[] = [
 //   { col: 0, row: 0, type: "black-rook", name: "black-rook-1", black: true },
