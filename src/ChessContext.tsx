@@ -36,6 +36,7 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
       row: number;
     }[]
   >([]);
+  const [blackPlay, setBlackPlay] = useState(false);
   const findCurrentPieces = ({ col, row }: { col: number; row: number }) =>
     currentPieces.find((data) => data.col === col && data.row === row);
 
@@ -202,10 +203,19 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
     );
     if (!selected) return;
     setCurrentPieces((previous) => {
-      const remaingArr = previous.filter(({ name }) => name !== selected.name);
+      const remaingArr = previous.filter((data) => {
+        if (data.name === selected.name) {
+          return false;
+        }
+        if (data.row === row && data.col === col) {
+          return false;
+        }
+        return true;
+      });
       setSelectedPieces(null);
       setCanPlace([]);
       setCanKill([]);
+      setBlackPlay(!selected.black);
       return [{ ...selected, col, row }, ...remaingArr];
     });
   };
@@ -229,6 +239,7 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
   const setPieces = ({ col, row }: { col: number; row: number }) => {
     const piece = findCurrentPieces({ col, row });
     if (!piece) return;
+    if (piece.black !== blackPlay) return;
     setSelectedPieces(piece);
     let arr: {
       col: number;

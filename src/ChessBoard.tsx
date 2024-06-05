@@ -9,7 +9,7 @@ const ChessBlock: React.FC<{ col: number; row: number }> = ({ col, row }) => {
   return (
     <div
       onClick={() =>
-        canplace ? movePieces({ col, row }) : setPieces({ col, row })
+        canplace || cankill ? movePieces({ col, row }) : setPieces({ col, row })
       }
       style={{
         background: cankill
