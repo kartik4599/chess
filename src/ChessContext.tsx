@@ -10,6 +10,11 @@ type ChessContextType = {
     cankill: boolean;
   };
   setPieces: (arg: { col: number; row: number }) => void;
+  elementedPieces: {
+    black: BoardPiece[];
+    white: BoardPiece[];
+  };
+  blackPlay: boolean;
 };
 
 const ChessContext = createContext<ChessContextType>({
@@ -17,6 +22,8 @@ const ChessContext = createContext<ChessContextType>({
   movePieces: () => {},
   getPieces: () => ({ canplace: false, cankill: false }),
   setPieces: () => {},
+  elementedPieces: { black: [], white: [] },
+  blackPlay: false,
 });
 
 const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -24,6 +31,10 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [currentPieces, setCurrentPieces] = useState(initState);
   const [selectedPieces, setSelectedPieces] = useState<BoardPiece | null>(null);
+  const [elementedPieces, setElementedPieces] = useState<{
+    black: BoardPiece[];
+    white: BoardPiece[];
+  }>({ black: [], white: [] });
   const [canPlace, setCanPlace] = useState<
     {
       col: number;
@@ -208,6 +219,17 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
           return false;
         }
         if (data.row === row && data.col === col) {
+          if (data.black) {
+            setElementedPieces({
+              ...elementedPieces,
+              black: [...elementedPieces.black, data],
+            });
+          } else {
+            setElementedPieces({
+              ...elementedPieces,
+              white: [...elementedPieces.white, data],
+            });
+          }
           return false;
         }
         return true;
@@ -319,7 +341,15 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <ChessContext.Provider
-      value={{ currentPieces, movePieces, setPieces, getPieces }}>
+      value={{
+        currentPieces,
+        movePieces,
+        setPieces,
+        getPieces,
+        elementedPieces,
+        blackPlay,
+      }}
+    >
       {children}
     </ChessContext.Provider>
   );
