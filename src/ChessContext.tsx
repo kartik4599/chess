@@ -36,21 +36,18 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
       row: number;
     }[]
   >([]);
+  const findCurrentPieces = ({ col, row }: { col: number; row: number }) =>
+    currentPieces.find((data) => data.col === col && data.row === row);
 
   // helper function
-
   const setBlackPawn = ({ col, row }: { col: number; row: number }) => {
     const arr = [];
-    currentPieces.find(
-      ({ col: cols, row: rows }) => cols === col + 1 && rows === row
-    )
+    findCurrentPieces({ col: col + 1, row })
       ? undefined
       : arr.push({ col: col + 1, row });
 
     if (col === 1) {
-      currentPieces.find(
-        ({ col: cols, row: rows }) => cols === col + 2 && rows === row
-      )
+      findCurrentPieces({ col: col + 2, row })
         ? undefined
         : arr.push({ col: col + 2, row });
     }
@@ -65,15 +62,11 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const setWhitePawn = ({ col, row }: { col: number; row: number }) => {
     const arr = [];
-    currentPieces.find(
-      ({ col: cols, row: rows }) => cols === col - 1 && rows === row
-    )
+    findCurrentPieces({ col: col - 1, row })
       ? undefined
       : arr.push({ col: col - 1, row });
     if (col === 6) {
-      currentPieces.find(
-        ({ col: cols, row: rows }) => cols === col - 2 && rows === row
-      )
+      findCurrentPieces({ col: col - 2, row })
         ? undefined
         : arr.push({ col: col - 2, row });
     }
@@ -88,17 +81,37 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const setRook = ({ col, row }: { col: number; row: number }) => {
     const arr = [];
-    for (let cols = col; cols < 8; cols++) {
+    let strucked = false;
+    for (let cols = col + 1; cols < 8; cols++) {
+      if (strucked) break;
+      if (findCurrentPieces({ col: cols, row })) {
+        strucked = true;
+      }
       arr.push({ col: cols, row: row });
     }
-    for (let cols = col; cols >= 0; cols--) {
+    strucked = false;
+    for (let cols = col - 1; cols >= 0; cols--) {
+      if (strucked) break;
+      if (findCurrentPieces({ col: cols, row })) {
+        strucked = true;
+      }
       arr.push({ col: cols, row: row });
     }
-    for (let rows = row; rows < 8; rows++) {
-      arr.push({ col: col, row: rows });
+    strucked = false;
+    for (let rows = row + 1; rows < 8; rows++) {
+      if (strucked) break;
+      arr.push({ col, row: rows });
+      if (findCurrentPieces({ col, row: rows })) {
+        strucked = true;
+      }
     }
-    for (let rows = row; rows >= 0; rows--) {
+    strucked = false;
+    for (let rows = row - 1; rows >= 0; rows--) {
+      if (strucked) break;
       arr.push({ col: col, row: rows });
+      if (findCurrentPieces({ col, row: rows })) {
+        strucked = true;
+      }
     }
 
     return arr;
@@ -106,31 +119,47 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const setBishop = ({ col, row }: { col: number; row: number }) => {
     const arr = [];
-    let cols = col;
-    let rows = row;
+
+    let cols = col + 1;
+    let rows = row - 1;
+    let strucked = false;
     while (cols < 8 && rows >= 0) {
+      if (strucked) break;
       arr.push({ col: cols, row: rows });
+      if (findCurrentPieces({ col: cols, row: rows })) strucked = true;
       cols++;
       rows--;
     }
-    cols = col;
-    rows = row;
+
+    cols = col - 1;
+    rows = row + 1;
+    strucked = false;
     while (cols >= 0 && rows < 8) {
+      if (strucked) break;
       arr.push({ col: cols, row: rows });
+      if (findCurrentPieces({ col: cols, row: rows })) strucked = true;
       cols--;
       rows++;
     }
-    cols = col;
-    rows = row;
+
+    cols = col + 1;
+    rows = row + 1;
+    strucked = false;
     while (cols < 8 && rows < 8) {
+      if (strucked) break;
       arr.push({ col: cols, row: rows });
+      if (findCurrentPieces({ col: cols, row: rows })) strucked = true;
       cols++;
       rows++;
     }
-    cols = col;
-    rows = row;
+
+    cols = col - 1;
+    rows = row - 1;
+    strucked = false;
     while (cols >= 0 && rows >= 0) {
+      if (strucked) break;
       arr.push({ col: cols, row: rows });
+      if (findCurrentPieces({ col: cols, row: rows })) strucked = true;
       cols--;
       rows--;
     }
@@ -182,9 +211,7 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getPieces = ({ col, row }: { col: number; row: number }) => {
-    const src = currentPieces.find(
-      (piece) => piece.col === col && piece.row === row
-    )?.type;
+    const src = findCurrentPieces({ col, row })?.type;
     const canplace = canPlace.find(
       (piece) => piece.col === col && piece.row === row
     );
@@ -200,9 +227,7 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const setPieces = ({ col, row }: { col: number; row: number }) => {
-    const piece = currentPieces.find(
-      (piece) => piece.col === col && piece.row === row
-    );
+    const piece = findCurrentPieces({ col, row });
     if (!piece) return;
     setSelectedPieces(piece);
     let arr: {
@@ -270,9 +295,7 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
       row: number;
     }[] = [];
     arr.forEach(({ col, row }) => {
-      const secoundPiece = currentPieces.find(
-        ({ col: cols, row: rows }) => cols === col && rows === row
-      );
+      const secoundPiece = findCurrentPieces({ col, row });
       if (!secoundPiece) {
         canplace.push({ col, row });
         return;
