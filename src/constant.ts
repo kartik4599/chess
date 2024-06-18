@@ -307,6 +307,23 @@ export type BoardPiece = {
   black: boolean;
 };
 
+export type ChessContextType = {
+  currentPieces: BoardPiece[];
+  movePieces: (arg: { col: number; row: number }) => void;
+  getPieces: (arg: { col: number; row: number }) => {
+    src?: string;
+    canplace: boolean;
+    cankill: boolean;
+    black?: boolean;
+  };
+  setPieces: (arg: { col: number; row: number }) => void;
+  elementedPieces: {
+    black: BoardPiece[];
+    white: BoardPiece[];
+  };
+  blackPlay: boolean;
+};
+
 export const initState: BoardPiece[] = [
   { col: 0, row: 0, type: "black-rook", name: "black-rook-1", black: true },
   { col: 0, row: 1, type: "black-knight", name: "black-knight-1", black: true },

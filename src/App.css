@@ -18,14 +18,31 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-.board-rotate {
-  transform: rotate(180deg);
-  transition: transform 2s linear;
+.sideChessBar {
+  display: flex;
+  width: 120px;
+  border-radius: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
-.board {
-  transform: rotate(0deg);
-  transition: transform 2s linear;
+.chess-board {
+  display: grid;
+  width: fit-content;
+  grid-template-columns: auto auto auto auto auto auto auto auto;
+  border-radius: 5px;
+  border: 30px solid #6d1e1d;
+}
+
+.chess-block {
+  height: 75px;
+  width: 75px;
+  border: 2px solid #b85f30;
+}
+
+.board-rotate {
+  transform: rotate(180deg);
 }
 
 .pieces-rotate {

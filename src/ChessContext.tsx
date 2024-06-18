@@ -1,21 +1,13 @@
 import { createContext, useContext, useState } from "react";
-import { BoardPiece, icons, initState } from "./constant";
-
-type ChessContextType = {
-  currentPieces: BoardPiece[];
-  movePieces: (arg: { col: number; row: number }) => void;
-  getPieces: (arg: { col: number; row: number }) => {
-    src?: string;
-    canplace: boolean;
-    cankill: boolean;
-  };
-  setPieces: (arg: { col: number; row: number }) => void;
-  elementedPieces: {
-    black: BoardPiece[];
-    white: BoardPiece[];
-  };
-  blackPlay: boolean;
-};
+import { BoardPiece, ChessContextType, icons, initState } from "./constant";
+import {
+  DndContext,
+  DragEndEvent,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 
 const ChessContext = createContext<ChessContextType>({
   currentPieces: [],
@@ -209,13 +201,9 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
   // hook functions
   const movePieces = ({ col, row }: { col: number; row: number }) => {
     if (!selectedPieces) return;
-    const selected = currentPieces.find(
-      ({ name }) => name === selectedPieces.name
-    );
-    if (!selected) return;
     setCurrentPieces((previous) => {
       const remaingArr = previous.filter((data) => {
-        if (data.name === selected.name) {
+        if (data.name === selectedPieces.name) {
           return false;
         }
         if (data.row === row && data.col === col) {
@@ -237,13 +225,13 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
       setSelectedPieces(null);
       setCanPlace([]);
       setCanKill([]);
-      setBlackPlay(!selected.black);
-      return [{ ...selected, col, row }, ...remaingArr];
+      setBlackPlay(!selectedPieces.black);
+      return [{ ...selectedPieces, col, row }, ...remaingArr];
     });
   };
 
   const getPieces = ({ col, row }: { col: number; row: number }) => {
-    const src = findCurrentPieces({ col, row })?.type;
+    const piece = findCurrentPieces({ col, row });
     const canplace = canPlace.find(
       (piece) => piece.col === col && piece.row === row
     );
@@ -252,9 +240,10 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
     );
 
     return {
-      src: src ? icons[src] : undefined,
+      src: piece?.type ? icons[piece?.type] : undefined,
       canplace: canplace ? true : false,
       cankill: cankill ? true : false,
+      black: piece?.black,
     };
   };
 
@@ -339,6 +328,27 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
     setCanKill(cankill);
   };
 
+  // drag and drop functions
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: { distance: 10 },
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: { delay: 300, tolerance: 5 },
+  });
+  const sensors = useSensors(mouseSensor, touchSensor);
+
+  const onDragEnd = ({ over }: DragEndEvent) => {
+    if (!over) return;
+    const { col, row } = over.data.current as { col: number; row: number };
+    const canplace = canPlace.find(
+      (piece) => piece.col === col && piece.row === row
+    );
+    const cankill = canKill.find(
+      (piece) => piece.col === col && piece.row === row
+    );
+    if (canplace || cankill) movePieces({ col, row });
+  };
+
   return (
     <ChessContext.Provider
       value={{
@@ -350,7 +360,9 @@ const ChessProvider: React.FC<{ children: React.ReactNode }> = ({
         blackPlay,
       }}
     >
-      {children}
+      <DndContext onDragEnd={onDragEnd} sensors={sensors}>
+        {children}
+      </DndContext>
     </ChessContext.Provider>
   );
 };
